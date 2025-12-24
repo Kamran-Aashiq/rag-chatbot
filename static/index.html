@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaAI - Water Management Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container" role="main">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar" role="navigation" aria-label="Chat navigation">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <i class="fas fa-tint" aria-hidden="true"></i>
+                    <h2>AquaAI</h2>
+                </div>
+                <button class="close-sidebar" id="close-sidebar" aria-label="Close sidebar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <button class="new-chat-btn" id="new-chat-btn" aria-label="Start new chat">
+                <i class="fas fa-plus" aria-hidden="true"></i> New Chat
+            </button>
+            
+            <div class="chat-history">
+                <div class="chat-history-title">Recent Chats</div>
+                <div class="chat-list" id="chat-list" role="list">
+                    <!-- Chat items will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Profile menu shown when user clicks avatar (desktop shows as panel, mobile as dropdown) -->
+            <div class="profile-menu" id="profile-menu" aria-hidden="true" style="display:none">
+                <button class="menu-option" id="menu-profile">
+                    <i class="fas fa-user"></i>&nbsp;Edit profile
+                </button>
+                <button class="menu-option" id="menu-change-avatar">
+                    <i class="fas fa-image"></i>&nbsp;Change avatar
+                </button>
+                <button class="menu-option" id="menu-change-password">
+                    <i class="fas fa-lock"></i>&nbsp;Change password
+                </button>
+                <button class="menu-option" id="menu-logout">
+                    <i class="fas fa-sign-out-alt"></i>&nbsp;Logout
+                </button>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-avatar" id="profile-btn" aria-label="User avatar" tabindex="0">JD</div>
+                <div class="user-info">
+                    <div class="user-name" id="profile-name">Kamran</div>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content" role="main">
+            <div class="main-header">
+                <button class="toggle-sidebar" id="toggle-sidebar" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+                <h3>AquaAI</h3>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    
+                </div>
+            </div>
+            
+            <div class="suggestions" role="toolbar" aria-label="Quick suggestions">
+                <div class="suggestion" data-question="Can you summarize the document?" role="button" tabindex="0">Summarize the document</div>
+                <div class="suggestion" data-question="What are the key findings about water management?" role="button" tabindex="0">Water management findings</div>
+                <div class="suggestion" data-question="How does climate change affect irrigation?" role="button" tabindex="0">Climate change & irrigation</div>
+                <div class="suggestion" data-question="Give me a practical water conservation tip" role="button" tabindex="0">Water conservation tip</div>
+            </div>
+            
+            <div class="chat-container" id="chat-container" role="log" aria-live="polite">
+                <div class="message bot-message">
+                    <div>Hello! I'm AquaAI, your specialized assistant for water management, climate change, and sustainability. How can I help you today?</div>
+                    <div class="message-time" id="initial-time"></div>
+                </div>
+                
+                <div class="typing-indicator" id="typing-indicator" aria-hidden="true">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <div class="add-container">
+                    <button class="action-btn add-btn" id="add-btn" title="Add" aria-label="Add">+
+                    </button>
+                    <div class="add-menu" id="add-menu" aria-hidden="true">
+                        <button class="add-menu-item" id="add-upload-doc">Upload Document</button>
+                        <button class="add-menu-item" id="add-upload-img">Upload Image</button>
+                    </div>
+                </div>
+                <button class="action-btn upload-btn" id="upload-btn" title="Upload Document" aria-label="Upload PDF document" style="display:none">
+                    <i class="fas fa-file-upload" aria-hidden="true"></i>
+                </button>
+                <input type="text" id="user-input" placeholder="Ask about water management, climate change, or sustainability..." autocomplete="off" aria-label="Message input">
+                <div class="input-actions">
+                    <button class="action-btn" id="send-btn" title="Send Message" aria-label="Send message">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="upload-modal" id="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-title">
+        <div class="upload-content">
+            <div class="upload-header">
+                <h2 id="upload-title">Upload Document</h2>
+                <button class="close-btn" id="close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Upload area">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                <p>Click to upload or drag and drop</p>
+                <span>PDF files only (Max size: 10MB)</span>
+                <input type="file" id="file-input" accept=".pdf" aria-hidden="true">
+            </div>
+            <div class="file-info" id="file-info">
+                <p><strong>Selected file:</strong> <span id="file-name">No file selected</span></p>
+                <p><strong>Size:</strong> <span id="file-size">-</span></p>
+            </div>
+            <div class="upload-actions">
+                <button class="modal-btn cancel-btn" id="cancel-upload">Cancel</button>
+                <button class="modal-btn upload-action-btn" id="process-document" disabled>Process Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal (separate element, not nested inside upload modal) -->
+    <div class="upload-modal" id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-title" style="display:none">
+        <div class="upload-content">
+            <div class="upload-header">
+                <h2 id="profile-title">Profile</h2>
+                <button class="close-btn" id="close-profile-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+                <div id="pm-avatar" style="width:72px;height:72px;border-radius:8px;background:#e0f2f1;display:flex;align-items:center;justify-content:center">A</div>
+                <div style="flex:1">
+                    <label for="pm-username">Display name</label>
+                    <input id="pm-username" type="text" disabled style="width:100%;padding:8px;border:1px solid #e0f2f1;border-radius:6px" />
+                    <label for="pm-email" style="margin-top:8px">Email</label>
+                    <input id="pm-email" type="email" disabled style="width:100%;padding:8px;border:1px solid #e0f2f1;border-radius:6px" />
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="modal-btn cancel-btn" id="pm-cancel">Cancel</button>
+                <button class="modal-btn" id="pm-edit">Edit</button>
+                <button class="modal-btn upload-action-btn" id="pm-save">Save</button>
+            </div>
+            <hr style="margin:12px 0" />
+            <div class="muted"><h2>Change password</h2></div>
+            <form id="pm-change-password" style="margin-top:8px">
+                <label for="pm-current">Current password</label>
+                <input id="pm-current" type="password" disabled style="width:100%;padding:8px;border:1px solid #e0f2f1;border-radius:6px" />
+                <label for="pm-new" style="margin-top:8px">New password</label>
+                <input id="pm-new" type="password" disabled style="width:100%;padding:8px;border:1px solid #e0f2f1;border-radius:6px" />
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+                    <button type="button" class="modal-btn cancel-btn" id="pm-pw-cancel">Close</button>
+                    <button type="submit" class="modal-btn upload-action-btn">Change Password</button>
+                </div>
+                <div id="pm-pw-msg" class="error"></div>
+            </form>
+            <hr style="margin:12px 0" />
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+                <button class="modal-btn cancel-btn" id="pm-logout">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

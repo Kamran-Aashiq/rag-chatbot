@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AquaAI - Reset Password</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#e0f7fa,#b2ebf2);font-family:Segoe UI,Arial,Helvetica,sans-serif;color:#004d40}
+    .wrap{width:100%;max-width:520px;padding:20px}
+    .card{background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.08);padding:24px}
+    h1{color:#006064;margin-bottom:6px}
+    label{display:block;margin-top:12px;margin-bottom:8px}
+    input{width:100%;padding:10px;border:1px solid #e0f2f1;border-radius:8px}
+    button{margin-top:12px;padding:10px;width:100%;background:linear-gradient(90deg,#006064,#00897b);color:#fff;border:none;border-radius:8px}
+    .note{margin-top:12px;color:#00796b}
+    .error{color:#c62828;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Reset your password</h1>
+      <p>Enter the email for your account and we'll send a reset token (development mode will display it).</p>
+      <form id="forgot-form">
+        <label for="email">Email</label>
+        <input id="email" type="email" required />
+        <button type="submit">Send reset token</button>
+        <div id="msg" class="note"></div>
+        <div id="err" class="error"></div>
+      </form>
+      <div style="margin-top:12px">
+        <a href="/login">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('forgot-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const err = document.getElementById('err'); err.textContent = '';
+      const msg = document.getElementById('msg'); msg.textContent = '';
+      try{
+        const res = await fetch('/forgot', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        const d = await res.json();
+        if (res.ok) {
+          msg.textContent = d.message || 'Check your email.';
+          if (d.token) {
+            msg.textContent += ' (dev token: ' + d.token + ')';
+          }
+        } else {
+          err.textContent = d.error || 'Request failed';
+        }
+      }catch(errx){ err.textContent = 'Network error'; }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!-- backup of original top-level login.html; moved to static/auth/login.html -->
+<!-- If you need the original content, look at static/auth/login.html -->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AquaAI - Auth</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#e0f7fa,#b2ebf2);font-family:Segoe UI,Arial,Helvetica,sans-serif;color:#004d40}
+    .login-wrapper{width:100%;max-width:520px;padding:24px}
+    .card{background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.08);padding:28px}
+    h1{color:#006064;margin-bottom:4px;font-size:1.6rem}
+    .subtitle{color:#006064;opacity:.85;margin-bottom:14px}
+    label{display:block;font-size:.9rem;color:#006064;margin-top:10px;margin-bottom:6px}
+    input{width:100%;padding:12px;border:1px solid #e0f2f1;border-radius:8px;font-size:1rem}
+    button{margin-top:16px;padding:12px;background:linear-gradient(90deg,#006064,#00897b);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+    .muted{color:#00796b;opacity:.9;font-size:.95rem;margin-top:8px}
+    .actions{display:flex;gap:10px;margin-top:12px}
+    .link{background:none;border:none;color:#006064;cursor:pointer;padding:6px;font-size:.95rem}
+    .small{font-size:.9rem;color:#006064;opacity:.85;margin-top:10px}
+    .error{color:#c62828;margin-top:10px;min-height:20px}
+    .tabs{display:flex;gap:8px;margin-bottom:14px}
+    .tab{flex:1;padding:10px;border-radius:8px;text-align:center;background:#f5f5f5;cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,#006064,#00897b);color:white}
+    .panel{display:none}
+    .panel.active{display:block}
+    .row{display:flex;gap:10px}
+    @media(max-width:520px){.login-wrapper{padding:12px}.card{padding:18px}}
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="card">
+      <h1>AquaAI</h1>
+      <p class="subtitle">Sign in or create an account</p>
+
+      <div class="tabs" role="tablist">
+        <div id="tab-login" class="tab active" role="tab" aria-selected="true">Login</div>
+        <div id="tab-register" class="tab" role="tab">Register</div>
+      </div>
+
+      <div id="panel-login" class="panel active" role="tabpanel">
+        <form id="login-form">
+          <label for="login-username">Username</label>
+          <input id="login-username" name="username" type="text" autocomplete="username" required />
+
+          <label for="login-password">Password</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+
+          <div style="margin-top:8px;margin-bottom:6px">
+            <a href="/forgot" id="forgot-link" style="color:#006064;font-size:.95rem;text-decoration:none;">Forgot password?</a>
+          </div>
+
+          <button id="login-btn" type="submit">Sign in</button>
+          <div id="login-error" class="error" role="alert" aria-live="polite"></div>
+        </form>
+        <div class="small">Default credentials: <code>admin / admin</code></div>
+      </div>
+
+      <div id="panel-register" class="panel" role="tabpanel">
+        <form id="register-form">
+          <label for="reg-username">Choose a username</label>
+          <input id="reg-username" name="username" type="text" required />
+
+          <label for="reg-email">Email</label>
+          <input id="reg-email" name="email" type="email" required />
+
+          <label for="reg-password">Password</label>
+          <input id="reg-password" name="password" type="password" required />
+
+          <button id="register-btn" type="submit">Create account</button>
+          <div id="register-error" class="error" role="alert" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <!-- Forgot panel removed; a link to /forgot is shown on the login panel -->
+
+      <!-- Profile functionality moved to chat UI profile menu and standalone pages -->
+
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+  // Forgot tab removed; use the standalone /forgot page
+      const panelLogin = document.getElementById('panel-login');
+      const panelRegister = document.getElementById('panel-register');
+
+      function setActive(tabEl, panelEl){
+        [tabLogin, tabRegister].forEach(t=>t.classList.remove('active'));
+        [panelLogin, panelRegister].forEach(p=>p.classList.remove('active'));
+        tabEl.classList.add('active');
+        panelEl.classList.add('active');
+      }
+
+  tabLogin.addEventListener('click', ()=> setActive(tabLogin, panelLogin));
+  tabRegister.addEventListener('click', ()=> setActive(tabRegister, panelRegister));
+
+      // Login submit
+      document.getElementById('login-form').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const err = document.getElementById('login-error'); err.textContent = '';
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        try{
+          const res = await fetch('/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+          const data = await res.json();
+          if (res.ok && data.success){
+            window.location.href = '/';
+          } else {
+            err.textContent = data.error || 'Invalid credentials';
+          }
+        }catch(errx){
+          err.textContent = 'Network error. Try again.';
+        }
+      });
+
+      // Register submit (client-side minimal behavior)
+      document.getElementById('register-form').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const err = document.getElementById('register-error'); err.textContent = '';
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        // Lightweight client-side validation
+        if (password.length < 6){ err.textContent = 'Password must be at least 6 characters'; return; }
+        // POST to /register if you add backend support; for now show success message
+        try{
+          const res = await fetch('/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,email,password})});
+          if (res.ok){
+            const d = await res.json();
+            alert(d.message || 'Account created. Please login.');
+            setActive(tabLogin, panelLogin);
+          } else {
+            const d = await res.json();
+            err.textContent = d.error || 'Registration failed';
+          }
+        }catch(x){
+          // If /register not implemented server-side, show friendly message
+          alert('Registration not enabled on this server. Contact admin.');
+        }
+      });
+
+      // Forgot flow is available at /forgot — link shown below password input.
+
+    })();
+  </script>
+</body>
+</html>
